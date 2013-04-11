@@ -1,0 +1,4 @@
+{
+  "main":"io.vertx.mods.paho.PahoMQTTBridge",
+  "worker":true
+}

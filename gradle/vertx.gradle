@@ -1,0 +1,87 @@
+/*
+ * Copyright 2013 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply plugin: 'maven-publish'
+
+ext.moduleName = "${project.name}".replaceFirst 'mod-', ''
+ext.modulePackageName = "${project.group}~${project.moduleName}~${project.version}"
+
+configurations {
+  provided
+  compile.extendsFrom provided
+}
+
+publishing {
+  repositories {
+    maven {
+      name 'snapshots'
+      url 'https://oss.sonatype.org/content/repositories/snapshots'
+      credentials {
+        username project.sonatypeUsername
+        password project.sonatypePassword
+      }
+    }
+    maven {
+      name 'staging'
+      url 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
+      credentials {
+        username project.sonatypeUsername
+        password project.sonatypePassword
+      }
+    }
+  }
+  publications {
+    maven(MavenPublication) {
+      mavenProjectIdentity.artifactId = project.moduleName
+      artifact("build/libs/${project.moduleName}-${project.version}.zip") {
+        extension "zip"
+        builtBy zipMod
+      }
+    }
+  }
+}
+
+jar.enabled = false
+
+task makeMod(type: Copy) {
+  destinationDir mkdir("build/mod/$modulePackageName")
+  outputs.file file("build/mod/$modulePackageName")
+
+  into "build/mod/$modulePackageName"
+  from compileJava
+  from compileGroovy
+  from processResources
+
+  into('lib') {
+    from configurations.compile - configurations.provided
+  }
+}
+
+task zipMod(type: Zip, dependsOn:['makeMod']) {
+  destinationDir mkdir('build/libs')
+  inputs.files file('build/mod')
+  outputs.files destinationDir
+
+  from "build/mod/$modulePackageName"
+
+  archiveName = "${project.moduleName}-${project.version}.zip"
+}
+
+artifacts {
+  archives zipMod
+}
+
+
