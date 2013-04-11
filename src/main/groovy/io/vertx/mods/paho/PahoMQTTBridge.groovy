@@ -36,40 +36,38 @@ class PahoMQTTBridge extends Verticle implements MqttCallback {
   static def DEFAULT_RELAY_ADDRESS = 'vertx.mqtt.relay'
 
   String controlAddress
-
   String relayAddress
 
   MqttClient client
-
   String defaultTopic
 
   int retryConnectionCounter = 0
-
   Map topicAddressBridge = [:]
-
   Set permittedActions = ['subscribe', 'unsubscribe']
 
   @Override
   def start(VoidResult result) {
-
     this.controlAddress = container.config['controlAddress'] ?: DEFAULT_CONTROL_ADDRESS
-
     this.relayAddress = container.config['relayAddress'] ?: DEFAULT_RELAY_ADDRESS
-
     this.defaultTopic = container.config['defaultTopic']
 
     vertx.eventBus.registerHandler(controlAddress, this.&control) { cid->
       assert cid != null
       vertx.eventBus.registerHandler(relayAddress, this.&relay) { rid->
         assert rid != null
-        
       } // end closure 2
     } // end closure1
 
+    /* 
+     * FIXME vert.x throws an exception if the try/catch is in the closure block above.
+     * org.codehaus.groovy.runtime.typehandling.GroovyCastException: 
+     *  Cannot cast object 'io.vertx.mods.paho.PahoMQTTBridge$_start_closure1@64aa8ffc' with class
+     *  'io.vertx.mods.paho.PahoMQTTBridge$_start_closure1' to class 'io.vertx.mods.paho.PahoMQTTBridge'
+     */
     try {
       configure(container.config['client'] as Map)
-      List subscriptions = container.config['subscriptions'] as List
 
+      List subscriptions = container.config['subscriptions'] as List
       subscriptions?.each { Map subscription->
         subscribe(subscription)
       }
@@ -79,8 +77,6 @@ class PahoMQTTBridge extends Verticle implements MqttCallback {
     catch (MqttException e) {
       result.setFailure(e)
     }
-
-    'end'
   }
 
   @Override
