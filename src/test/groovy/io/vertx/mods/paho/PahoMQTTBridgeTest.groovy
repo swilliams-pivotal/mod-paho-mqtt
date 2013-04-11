@@ -31,9 +31,11 @@ class PahoMQTTBridgeTest extends TestVerticle {
   @Test
   public void testSubscribe() {
     def map = [
-      'server-uri': 'm2m.eclipse.org',
-      'client-id': 'vertx-test-client-' + System.currentTimeMillis(),
-      'persistence-enabled': false
+      'client': [
+        'server-uri': 'tcp://m2m.eclipse.org:1883',
+        'client-id': 'vertx-' + System.currentTimeMillis(),
+        'persistence-enabled': false
+      ]
     ]
     def config = new JsonObject(map)
     container.deployWorkerVerticle('groovy:'+PahoMQTTBridge.name, config, 1, false, { did->
@@ -45,9 +47,11 @@ class PahoMQTTBridgeTest extends TestVerticle {
   @Test
   public void testUnsubscribe() {
     def map = [
-      'server-uri': 'm2m.eclipse.org',
-      'client-id': 'vertx-test-client-' + System.currentTimeMillis(),
-      'persistence-enabled': false
+      'client': [
+        'server-uri': 'tcp://m2m.eclipse.org:1883',
+        'client-id': 'vertx-' + System.currentTimeMillis(),
+        'persistence-enabled': false
+      ]
     ]
     def config = new JsonObject(map)
     container.deployWorkerVerticle('groovy:'+PahoMQTTBridge.name, config, 1, false, { did->
@@ -59,9 +63,11 @@ class PahoMQTTBridgeTest extends TestVerticle {
   @Test
   public void testRelay() {
     def map = [
-      'server-uri': 'm2m.eclipse.org',
-      'client-id': 'vertx-test-client-' + System.currentTimeMillis(),
-      'persistence-enabled': false
+      'client': [
+        'server-uri': 'tcp://m2m.eclipse.org:1883',
+        'client-id': 'vertx-' + System.currentTimeMillis(),
+        'persistence-enabled': false
+      ]
     ]
     def config = new JsonObject(map)
     container.deployWorkerVerticle('groovy:'+PahoMQTTBridge.name, config, 1, false, { did->

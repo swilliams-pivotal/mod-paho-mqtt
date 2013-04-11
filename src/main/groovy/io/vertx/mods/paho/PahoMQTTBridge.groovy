@@ -31,7 +31,7 @@ import org.eclipse.paho.client.mqttv3.*
 @CompileStatic
 class PahoMQTTBridge extends Verticle implements MqttCallback {
 
-  static def DEFAULT_CONTROL_ADDRESS = 'vertx.mqtt.relay'
+  static def DEFAULT_CONTROL_ADDRESS = 'vertx.mqtt.control'
 
   static def DEFAULT_RELAY_ADDRESS = 'vertx.mqtt.relay'
 
@@ -58,23 +58,29 @@ class PahoMQTTBridge extends Verticle implements MqttCallback {
 
     this.defaultTopic = container.config['defaultTopic']
 
-    vertx.eventBus.registerHandler(controlAddress, this.&control) {
-      vertx.eventBus.registerHandler(relayAddress, this.&relay) {
-        try {
-          configure(container.config['client'] as Map)
-          List subscriptions = container.config['subscriptions'] as List
+    vertx.eventBus.registerHandler(controlAddress, this.&control) { cid->
+      assert cid != null
+      vertx.eventBus.registerHandler(relayAddress, this.&relay) { rid->
+        assert rid != null
+        
+      } // end closure 2
+    } // end closure1
 
-          subscriptions?.each { Map subscription->
-            subscribe(subscription)
-          }
+    try {
+      configure(container.config['client'] as Map)
+      List subscriptions = container.config['subscriptions'] as List
 
-          result.setResult()
-        }
-        catch (MqttException e) {
-          result.setFailure(e)
-        }
+      subscriptions?.each { Map subscription->
+        subscribe(subscription)
       }
+
+      result.setResult()
     }
+    catch (MqttException e) {
+      result.setFailure(e)
+    }
+
+    'end'
   }
 
   @Override
