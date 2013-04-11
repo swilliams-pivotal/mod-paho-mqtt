@@ -33,8 +33,10 @@ class PahoMQTTBridgeTest extends TestVerticle {
     def map = [
       'client': [
         'server-uri': 'tcp://m2m.eclipse.org:1883',
-        'client-id': 'vertx-' + System.currentTimeMillis(),
-        'persistence-enabled': false
+        'client-id': 'vertx-' + System.currentTimeMillis()
+      ],
+      'subscriptions':[
+        ['topic':'foo', 'address':'test.foo']
       ]
     ]
     def config = new JsonObject(map)
@@ -49,8 +51,10 @@ class PahoMQTTBridgeTest extends TestVerticle {
     def map = [
       'client': [
         'server-uri': 'tcp://m2m.eclipse.org:1883',
-        'client-id': 'vertx-' + System.currentTimeMillis(),
-        'persistence-enabled': false
+        'client-id': 'vertx-' + System.currentTimeMillis()
+      ],
+      'subscriptions':[
+        ['topic':'foo', 'address':'test.foo']
       ]
     ]
     def config = new JsonObject(map)
@@ -65,8 +69,7 @@ class PahoMQTTBridgeTest extends TestVerticle {
     def map = [
       'client': [
         'server-uri': 'tcp://m2m.eclipse.org:1883',
-        'client-id': 'vertx-' + System.currentTimeMillis(),
-        'persistence-enabled': false
+        'client-id': 'vertx-' + System.currentTimeMillis()
       ]
     ]
     def config = new JsonObject(map)

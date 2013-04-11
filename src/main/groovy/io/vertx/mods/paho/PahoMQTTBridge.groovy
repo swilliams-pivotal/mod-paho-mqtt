@@ -108,7 +108,7 @@ class PahoMQTTBridge extends Verticle implements MqttCallback {
     String uri = config['server-uri']
     String clientId = config['client-id']
 
-    if (config['persistence-enabled']) {
+    if (config['persistence-dir']) {
       String persistenceDir = config['persistence-dir'] ?: System.getProperty("java.io.tmpdir")
       def persistence = new MqttDefaultFilePersistence(persistenceDir)
       client = new MqttClient(uri, clientId, persistence)
@@ -157,7 +157,7 @@ class PahoMQTTBridge extends Verticle implements MqttCallback {
 
     String address = config['address']
     String topicName = config['topic'] ?: defaultTopic
-    int qos = config['qos'] as int ?: 2
+    int qos = (config['qos'] ?: 2) as int
 
     client?.connect()
     client?.subscribe(topicName, qos)
