@@ -32,7 +32,6 @@ import org.eclipse.paho.client.mqttv3.*
 class PahoMQTTBridge extends Verticle implements MqttCallback {
 
   static def DEFAULT_CONTROL_ADDRESS = 'vertx.mqtt.control'
-
   static def DEFAULT_RELAY_ADDRESS = 'vertx.mqtt.relay'
 
   String controlAddress
@@ -85,7 +84,6 @@ class PahoMQTTBridge extends Verticle implements MqttCallback {
       vertx.eventBus.registerHandler(controlAddress, this.&control) {
 
         Set keys = topicAddressBridge.keySet()
-
         if (keys.size() > 0) {
           client?.connect()
 
