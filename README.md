@@ -1,7 +1,5 @@
-# ProjectName
+# mod-paho-mqtt
 
-A project summary goes here
+A vert.x module for MQTT using Eclipse Paho.
 
-## A_set_of_build_instructions
-
-Put your build instructions here.
+TBC
