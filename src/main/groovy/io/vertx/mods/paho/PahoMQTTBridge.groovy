@@ -22,6 +22,7 @@ import org.vertx.groovy.platform.Verticle
 import org.vertx.java.core.VoidResult
 
 import org.eclipse.paho.client.mqttv3.*
+import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence
 
 
 /**
@@ -102,14 +103,9 @@ class PahoMQTTBridge extends Verticle implements MqttCallback {
     String uri = config['server-uri']
     String clientId = config['client-id']
 
-    if (config['persistence-dir']) {
-      String persistenceDir = config['persistence-dir'] ?: System.getProperty("java.io.tmpdir")
-      def persistence = new MqttDefaultFilePersistence(persistenceDir)
-      client = new MqttClient(uri, clientId, persistence)
-    }
-    else {
-      client = new MqttClient(uri, clientId)
-    }
+    String persistenceDir = config['persistence-dir'] ?: System.getProperty("java.io.tmpdir")
+    def persistence = new MqttDefaultFilePersistence(persistenceDir)
+    client = new MqttClient(uri, clientId, persistence)
 
     client.setCallback(this)
 
@@ -176,13 +172,13 @@ class PahoMQTTBridge extends Verticle implements MqttCallback {
   }
 
   @Override
-  public void deliveryComplete(MqttDeliveryToken token) {
+  public void deliveryComplete(IMqttDeliveryToken token) {
     // TODO Auto-generated method stub
   }
 
   @Override
-  public void messageArrived(MqttTopic topic, MqttMessage msg) throws Exception {
-    String address = topicAddressBridge.get(topic.name)
+  public void messageArrived(String topic, MqttMessage msg) throws Exception {
+    String address = topicAddressBridge.get(topic)
     vertx.eventBus.send(address, msg.payload)
   }
 
