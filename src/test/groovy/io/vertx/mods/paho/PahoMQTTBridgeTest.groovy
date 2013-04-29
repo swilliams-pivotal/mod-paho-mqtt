@@ -18,6 +18,7 @@ package io.vertx.mods.paho
 import static org.junit.Assert.*
 import static org.vertx.testtools.VertxAssert.*
 import org.junit.Test
+import org.vertx.java.core.AsyncResult
 import org.vertx.java.core.Handler
 import org.vertx.java.core.json.JsonObject
 import org.vertx.testtools.TestVerticle
@@ -40,8 +41,9 @@ class PahoMQTTBridgeTest extends TestVerticle {
       ]
     ]
     def config = new JsonObject(map)
-    container.deployWorkerVerticle('groovy:'+PahoMQTTBridge.name, config, 1, false, { did->
-      assertNotNull(did)
+    container.deployWorkerVerticle('groovy:'+PahoMQTTBridge.name, config, 1, true, { AsyncResult did->
+      if (did.failed()) did.cause().printStackTrace()
+      assertTrue(did.succeeded())
       testComplete()
     } as Handler)
   }
@@ -58,8 +60,9 @@ class PahoMQTTBridgeTest extends TestVerticle {
       ]
     ]
     def config = new JsonObject(map)
-    container.deployWorkerVerticle('groovy:'+PahoMQTTBridge.name, config, 1, false, { did->
-      assertNotNull(did)
+    container.deployWorkerVerticle('groovy:'+PahoMQTTBridge.name, config, 1, true, { AsyncResult did->
+      if (did.failed()) did.cause().printStackTrace()
+      assertTrue(did.succeeded())
       testComplete()
     } as Handler)
   }
@@ -73,8 +76,12 @@ class PahoMQTTBridgeTest extends TestVerticle {
       ]
     ]
     def config = new JsonObject(map)
-    container.deployWorkerVerticle('groovy:'+PahoMQTTBridge.name, config, 1, false, { did->
-      assertNotNull(did)
+    container.deployWorkerVerticle('groovy:'+PahoMQTTBridge.name, config, 1, true, { AsyncResult did->
+      if (did.failed()) did.cause().printStackTrace()
+      assertTrue(did.succeeded())
+
+      vertx.eventBus().send("", false)
+
       testComplete()
     } as Handler)
   }

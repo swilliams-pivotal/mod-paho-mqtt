@@ -16,8 +16,8 @@
 
 apply plugin: 'maven-publish'
 
-ext.moduleName = "${project.name}".replaceFirst 'mod-', ''
-ext.modulePackageName = "${project.group}~${project.moduleName}~${project.version}"
+// ext.moduleName = "${project.name}".replaceFirst 'mod-', ''
+ext.modulePackageName = "${project.group}~${project.name}~${project.version}"
 
 configurations {
   provided
@@ -45,13 +45,21 @@ publishing {
   }
   publications {
     maven(MavenPublication) {
-      mavenProjectIdentity.artifactId = project.moduleName
-      artifact("build/libs/${project.moduleName}-${project.version}.zip") {
+      mavenProjectIdentity.artifactId = project.name
+      artifact("build/libs/${project.name}-${project.version}.zip") {
         extension "zip"
         builtBy zipMod
       }
+      artifact sourceJar {
+        classifier 'sources'
+      }
     }
   }
+}
+
+task sourceJar(type: Jar) {
+  baseName project.name
+  from sourceSets.main.allJava
 }
 
 jar.enabled = false
@@ -77,7 +85,7 @@ task zipMod(type: Zip, dependsOn:['makeMod']) {
 
   from "build/mod/$modulePackageName"
 
-  archiveName = "${project.moduleName}-${project.version}.zip"
+  archiveName = "${project.name}-${project.version}.zip"
 }
 
 artifacts {

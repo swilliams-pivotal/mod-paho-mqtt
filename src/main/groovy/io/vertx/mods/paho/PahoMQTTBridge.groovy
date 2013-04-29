@@ -19,7 +19,8 @@ import groovy.transform.CompileStatic
 
 import org.vertx.groovy.core.eventbus.Message
 import org.vertx.groovy.platform.Verticle
-import org.vertx.java.core.VoidResult
+import org.vertx.java.core.AsyncResult
+import org.vertx.java.core.Future
 
 import org.eclipse.paho.client.mqttv3.*
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence
@@ -46,17 +47,19 @@ class PahoMQTTBridge extends Verticle implements MqttCallback {
   Set permittedActions = ['subscribe', 'unsubscribe']
 
   @Override
-  def start(VoidResult result) {
+  def start(Future<Void> result) {
     this.controlAddress = container.config['controlAddress'] ?: DEFAULT_CONTROL_ADDRESS
     this.relayAddress = container.config['relayAddress'] ?: DEFAULT_RELAY_ADDRESS
     this.defaultTopic = container.config['defaultTopic']
 
-    vertx.eventBus.registerHandler(controlAddress, this.&control) { cid->
-      assert cid != null
-      vertx.eventBus.registerHandler(relayAddress, this.&relay) { rid->
-        assert rid != null
+    vertx.eventBus.registerHandler(controlAddress, this.&control) { AsyncResult arc->
+      if (arc.failed()) result.setFailure(arc.cause())
+      vertx.eventBus.registerHandler(relayAddress, this.&relay) { AsyncResult arr->
+        if (arr.failed()) result.setFailure(arr.cause())
       } // end closure 2
-    } // end closure1
+    } // end closure 1
+
+
 
     /* 
      * FIXME vert.x throws an exception if the try/catch is in the closure block above.
@@ -72,7 +75,7 @@ class PahoMQTTBridge extends Verticle implements MqttCallback {
         subscribe(subscription)
       }
 
-      result.setResult()
+      result.setResult(null)
     }
     catch (MqttException e) {
       result.setFailure(e)
@@ -82,7 +85,7 @@ class PahoMQTTBridge extends Verticle implements MqttCallback {
   @Override
   def stop() {
     vertx.eventBus.unregisterHandler(relayAddress, this.&relay) {
-      vertx.eventBus.registerHandler(controlAddress, this.&control) {
+      vertx.eventBus.unregisterHandler(controlAddress, this.&control) {
 
         Set keys = topicAddressBridge.keySet()
         if (keys.size() > 0) {
@@ -103,7 +106,7 @@ class PahoMQTTBridge extends Verticle implements MqttCallback {
     String uri = config['server-uri']
     String clientId = config['client-id']
 
-    String persistenceDir = config['persistence-dir'] ?: System.getProperty("java.io.tmpdir")
+    String persistenceDir = config['persistence-dir'] ?: System.getProperty('java.io.tmpdir')
     def persistence = new MqttDefaultFilePersistence(persistenceDir)
     client = new MqttClient(uri, clientId, persistence)
 

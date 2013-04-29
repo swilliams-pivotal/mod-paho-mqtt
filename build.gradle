@@ -55,8 +55,9 @@ dependencies {
 }
 
 test {
+  systemProperty 'vertx.mods', 'build/mods'
   systemProperty 'vertx.test.timeout', 60
-
+  
   // classpath -= configurations.provided
   outputs.upToDateWhen { false }
 
